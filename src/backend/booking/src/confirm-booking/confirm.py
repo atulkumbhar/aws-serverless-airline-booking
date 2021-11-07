@@ -50,12 +50,12 @@ def confirm_booking(booking_id):
     """
     try:
         reference = secrets.token_urlsafe(4)
-        logger.debug(
-            {
-                "operation": "booking_confirmation",
-                "details": {"booking_id": booking_id, "booking_reference": reference},
-            }
-        )
+        # logger.debug(
+        #     {
+        #         "operation": "booking_confirmation",
+        #         "details": {"booking_id": booking_id, "booking_reference": reference},
+        #     }
+        # )
         ret = table.update_item(
             Key={"id": booking_id},
             ConditionExpression="id = :idVal",
@@ -69,12 +69,12 @@ def confirm_booking(booking_id):
             ReturnValues="UPDATED_NEW",
         )
 
-       # logger.info({"operation": "booking_confirmation", "details": ret})
+#        logger.info({"operation": "booking_confirmation", "details": ret})
         tracer.put_metadata(booking_id, ret)
 
         return {"bookingReference": reference}
     except ClientError as err:
-      #  logger.exception({"operation": "booking_confirmation"})
+#        logger.exception({"operation": "booking_confirmation"})
         raise BookingConfirmationException(details=err)
 
 metrics.set_property("BookingReference", ret["bookingReference"])
