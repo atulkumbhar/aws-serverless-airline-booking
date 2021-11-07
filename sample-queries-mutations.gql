@@ -1,14 +1,14 @@
 ## Add a bunch of flights for December 2nd 2019 (year-month-day)
 ## auth user must be Admin
 
-mutation flight1 {
+mutation flight6{
     createFlight(input:{
-        departureDate: "2021-04-10T08:00+0000",
+        departureDate: "2021-10-29T18:15+0000",
         departureAirportCode: "LGW",
         departureAirportName: "London Gatwick",
         departureCity: "London",
         departureLocale: "Europe/London",
-        arrivalDate: "2021-04-10T10:15+0000",
+        arrivalDate: "2021-10-29T19:15+0000",
         arrivalAirportCode: "MAD",
         arrivalAirportName: "Madrid Barajas",
         arrivalCity: "Madrid",

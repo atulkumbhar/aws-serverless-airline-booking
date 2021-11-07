@@ -8,6 +8,10 @@ from botocore.exceptions import ClientError
 
 from process_booking import process_booking_handler
 
+from aws_embedded_metrics import metric_scope
+@metric_scope
+
+
 logger = Logger()
 tracer = Tracer()
 metrics = Metrics()
@@ -65,15 +69,16 @@ def confirm_booking(booking_id):
             ReturnValues="UPDATED_NEW",
         )
 
-        logger.info({"operation": "booking_confirmation", "details": ret})
+       # logger.info({"operation": "booking_confirmation", "details": ret})
         tracer.put_metadata(booking_id, ret)
 
         return {"bookingReference": reference}
     except ClientError as err:
-        logger.exception({"operation": "booking_confirmation"})
+      #  logger.exception({"operation": "booking_confirmation"})
         raise BookingConfirmationException(details=err)
 
-
+metrics.set_property("BookingReference", ret["bookingReference"])
+metrics.set_property("event", event)    
 @metrics.log_metrics(capture_cold_start_metric=True)
 @process_booking_handler(logger=logger)
 def lambda_handler(event, context):
@@ -104,11 +109,11 @@ def lambda_handler(event, context):
     booking_id = event.get("bookingId")
     if not booking_id:
         metrics.add_metric(name="InvalidConfirmationRequest", unit=MetricUnit.Count, value=1)
-        logger.error({"operation": "input_validation", "details": event})
+        # logger.error({"operation": "input_validation", "details": event})
         raise ValueError("Invalid booking ID")
 
     try:
-        logger.debug(f"Confirming booking - {booking_id}")
+       # logger.debug(f"Confirming booking - {booking_id}")
         ret = confirm_booking(booking_id)
 
         metrics.add_metric(name="SuccessfulBooking", unit=MetricUnit.Count, value=1)
@@ -120,5 +125,5 @@ def lambda_handler(event, context):
     except BookingConfirmationException as err:
         metrics.add_metric(name="FailedBooking", unit=MetricUnit.Count, value=1)
         tracer.put_annotation("BookingStatus", "ERROR")
-        logger.exception({"operation": "booking_confirmation"})
+       # logger.exception({"operation": "booking_confirmation"})
         raise
